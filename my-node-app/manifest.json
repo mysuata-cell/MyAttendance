@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "កម្មវិធីគ្រប់គ្រងសិស្ស អវត្តមាន ពិន្ទុ និងអត្ថបទ",
+  "short_name": "SchoolApp",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "description": "ប្រព័ន្ធគ្រប់គ្រងសិស្ស ស្រង់អវត្តមាន គណនាពិន្ទុ និងអត្ថបទ",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

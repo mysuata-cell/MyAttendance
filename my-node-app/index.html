@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ប្រព័ន្ធគ្រប់គ្រងសេវារដ្ឋបាលថ្នាក់រៀន</title>
+  
+  <!-- Tailwind CSS & Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- 1. Favicon (បង្ហាញលើ Tab Browser) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
+  <link rel="shortcut icon" href="/logo.png">
+
+  <!-- 2. Apple / Mobile Touch Icon -->
+  <link rel="apple-touch-icon" href="/logo.png">
+
+  <!-- 3. Web App Manifest (សម្រាប់ Desktop & Mobile App Install) -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- 4. PWA Meta Tags -->
+  <meta name="theme-color" content="#1e293b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SchoolApp">
+
+  <style>
+    body { font-family: 'Kantumruy Pro', sans-serif; }
+    /* លុបព្រួញ dropdown ចោលលើគ្រប់ Browser */
+    .att-day-input {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      text-align-last: center; /* ឲ្យអក្សរនៅចំកណ្តាលស្តុក */
+    }
+  </style>
+</head>
+<body class="bg-slate-100 flex h-screen overflow-hidden">
+
+  <!-- Sidebar (របារខាងឆ្វេង) -->
+  <aside class="w-64 bg-slate-900 text-white flex flex-col justify-between p-4 shrink-0 shadow-xl">
+    <div>
+      <div class="text-xl font-bold text-center py-4 border-b border-slate-700 text-blue-400">
+        🏫 រដ្ឋបាលថ្នាក់រៀន
+      </div>
+      <nav class="mt-6 space-y-2">
+        <button onclick="showTab('studentTab')" id="btn-studentTab" class="nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 bg-blue-600 text-white font-medium">
+          <span>👤</span>
+          <span>ចុះឈ្មោះសិស្ស</span>
+        </button>
+        <button onclick="showTab('attendanceTab')" id="btn-attendanceTab" class="nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 text-slate-300 hover:bg-slate-800 font-medium">
+          <span>📋</span>
+          <span>សម្រង់អវត្តមាន</span>
+        </button>
+        <button onclick="showTab('scoreTab')" id="btn-scoreTab" class="nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 text-slate-300 hover:bg-slate-800 font-medium">
+          <span>📊</span>
+          <span>សម្រង់ពិន្ទុ</span>
+        </button>
+        <button onclick="showTab('articleTab')" id="btn-articleTab" class="nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 text-slate-300 hover:bg-slate-800 font-medium">
+          <span>📚</span><span>សម្រង់អត្ថបទ</span>
+        </button>
+        <button onclick="showTab('meetingTab')" id="btn-meetingTab" class="nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 text-slate-300 hover:bg-slate-800 font-medium">
+          <span>📝</span><span>កំណត់ហេតុប្រជុំ</span>
+        </button>
+      </nav>
+    </div>
+    <div class="text-xs text-slate-500 text-center pb-2">
+      Teacher Admin System v2.0
+    </div>
+  </aside>
+
+  <!-- Main Content Area (ផ្ទៃបង្ហាញខាងស្តាំ) -->
+  <main class="flex-1 overflow-y-auto p-4 md:p-8 w-full">
+    <header class="mb-6 border-b pb-4">
+      <h1 class="text-xl md:text-2xl font-bold text-slate-800">ប្រព័ន្ធគ្រប់គ្រងសេវារដ្ឋបាល និងការងារបង្រៀន</h1>
+    </header>
+
+    <!-- 1. ទម្រង់ចុះឈ្មោះសិស្ស + បញ្ជីសិស្ស -->
+    <section id="studentTab" class="tab-content space-y-6">
+      <!-- Form បញ្ចូល/កែប្រែសិស្ស -->
+      <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200">
+        <h2 class="text-base md:text-lg font-bold text-slate-700 mb-4 border-b pb-2" id="studentFormTitle">👤 ចុះឈ្មោះសិស្សថ្មី</h2>
+        <form id="studentForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="hidden" id="studentId">
+
+          <div>
+            <label class="block text-sm font-medium mb-1">ឈ្មោះសិស្ស (ខេមរភាសា)</label>
+            <input type="text" id="regStudentName" required class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="ឧ. សុខ មករា">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">ភេទ</label>
+            <select id="regGender" class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="ប្រុស">ប្រុស</option>
+              <option value="ស្រី">ស្រី</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">ថ្ងៃខែឆ្នាំកំណើត</label>
+            <input type="date" id="regDob" required class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">ថ្នាក់រៀន</label>
+            <input type="text" id="regClass" required class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="ឧ. ថ្នាក់ទី ១០A">
+          </div>
+          <div class="md:col-span-2 text-right space-x-2 pt-2">
+            <button type="button" id="btnCancelEdit" onclick="resetStudentForm()" class="hidden bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 transition text-sm">បោះបង់</button>
+            <button type="submit" id="btnSaveStudent" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition text-sm">រក្សាទុកទិន្នន័យសិស្ស</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Control Search & Sort -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div class="w-full md:w-1/2">
+          <input type="text" id="studentSearchInput" oninput="filterAndSortStudents()" placeholder="🔍 ស្វែងរកតាមឈ្មោះ ឬ ថ្នាក់រៀន..." class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+        </div>
+        <div class="flex items-center space-x-2 text-sm w-full md:w-auto justify-between md:justify-end">
+          <label class="font-medium text-slate-600 whitespace-nowrap">តម្រៀបតាម៖</label>
+          <select id="studentSortSelect" onchange="filterAndSortStudents()" class="border p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+            <option value="name-asc">ឈ្មោះ (ក ដល់ អ)</option>
+            <option value="name-desc">ឈ្មោះ (អ ដល់ ក)</option>
+            <option value="class-asc">ថ្នាក់រៀន (A-Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- បញ្ជីសិស្ស -->
+      <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+          <h2 class="text-base md:text-lg font-bold text-slate-700">📜 បញ្ជីឈ្មោះសិស្សសរុប</h2>
+          <button onclick="loadStudents()" class="text-xs md:text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-md border transition">🔄 ធ្វើបច្ចុប្បន្នភាព</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[600px] text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 text-xs md:text-sm">
+                <th class="p-3 border w-12 text-center">ល.រ</th>
+                <th class="p-3 border">ឈ្មោះសិស្ស</th>
+                <th class="p-3 border w-16 text-center">ភេទ</th>
+                <th class="p-3 border">ថ្ងៃខែឆ្នាំកំណើត</th>
+                <th class="p-3 border">ថ្នាក់រៀន</th>
+                <th class="p-3 border text-center w-28">សកម្មភាព</th>
+              </tr>
+            </thead>
+            <tbody id="studentTableBody" class="text-slate-600 text-xs md:text-sm">
+              <tr>
+                <td colspan="6" class="p-4 text-center text-slate-400">កំពុងទាញយកទិន្នន័យ...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. សម្រង់អវត្តមានប្រចាំខែ (Attendance Tab) -->
+    <section id="attendanceTab" class="tab-content hidden space-y-6">
+      <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 border-b pb-4">
+          <h2 class="text-base md:text-lg font-bold text-slate-700">📋 សម្រង់អវត្តមានសិស្សប្រចាំខែ (ថ្ងៃទី ១-៣១)</h2>
+          
+          <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            <div class="flex-1 min-w-[130px]">
+              <label class="text-xs font-semibold text-slate-500 block mb-1">ជ្រើសរើសថ្នាក់</label>
+              <select id="attFilterClass" onchange="loadAttendanceTable()" class="w-full border p-2 rounded-lg text-sm bg-slate-50 font-semibold outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">-- ជ្រើសរើសថ្នាក់ --</option>
+              </select>
+            </div>
+            <div class="flex-1 min-w-[130px]">
+              <label class="text-xs font-semibold text-slate-500 block mb-1">ជ្រើសរើសខែ</label>
+              <input type="month" id="attFilterMonth" onchange="loadAttendanceTable()" class="w-full border p-2 rounded-lg text-sm bg-slate-50 font-semibold outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="w-full sm:w-auto sm:self-end">
+              <button onclick="saveAttendanceData()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg shadow transition text-sm">
+                💾 រក្សាទុក Database
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-600 mb-3 bg-slate-50 p-2.5 rounded-lg border">
+          <span class="font-bold text-slate-700">សម្គាល់៖</span>
+          <span class="text-green-600 font-bold">✔ = វត្តមាន</span>
+          <span class="text-amber-600 font-bold">P = ច្បាប់</span>
+          <span class="text-red-600 font-bold">A = អវត្តមាន (ឥតច្បាប់)</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[800px] border-collapse text-xs text-center">
+            <thead>
+              <tr class="bg-slate-800 text-white" id="attTableHeader">
+                <th class="p-2 border border-slate-700 w-10">ល.រ</th>
+                <th class="p-2 border border-slate-700 min-w-[140px] text-left">ឈ្មោះសិស្ស</th>
+                <th class="p-2 border border-slate-700 w-12">ភេទ</th>
+              </tr>
+            </thead>
+            <tbody id="attTableBody" class="text-slate-700">
+              <tr>
+                <td colspan="34" class="p-6 text-center text-slate-400">សូមជ្រើសរើសថ្នាក់ និងខែ ដើម្បីបង្ហាញតារាងអវត្តមាន</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. ទម្រង់សម្រង់ពិន្ទុ + បញ្ជីពិន្ទុ (Score Tab) -->
+    <section id="scoreTab" class="tab-content hidden space-y-6">
+      <!-- ប្លុកបន្ថែមមុខវិជ្ជាថ្មី -->
+      <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200">
+        <h2 class="text-base md:text-lg font-bold text-slate-700 mb-3 border-b pb-2">📚 គ្រប់គ្រងមុខវិជ្ជា</h2>
+        <form id="subjectForm" class="flex flex-col sm:flex-row gap-3 items-end">
+          <div class="w-full sm:flex-1">
+            <label class="block text-sm font-medium mb-1">ឈ្មោះមុខវិជ្ជាថ្មី</label>
+            <input type="text" id="newSubjectName" required class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-sm" placeholder="ឧ. គណិតវិទ្យា, អក្សរសាស្ត្រខ្មែរ">
+          </div>
+          <button type="submit" class="w-full sm:w-auto bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-medium whitespace-nowrap">➕ បន្ថែមមុខវិជ្ជា</button>
+        </form>
+      </div>
+
+      <!-- Form បញ្ចូល/កែប្រែពិន្ទុ -->
+      <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200">
+        <h2 class="text-base md:text-lg font-bold text-slate-700 mb-4 border-b pb-2" id="scoreFormTitle">📊 បញ្ចូលសម្រង់ពិន្ទុសិស្សប្រចាំខែ</h2>
+        <form id="scoreForm" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <input type="hidden" id="scoreId">
+
+          <div class="col-span-2">
+            <label class="block text-xs md:text-sm font-medium mb-1">ឈ្មោះសិស្ស</label>
+            <select id="scoreStudentName" required class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-sm">
+              <option value="">-- ជ្រើសរើសសិស្ស --</option>
+            </select>
+          </div>
+          <div class="col-span-1">
+            <label class="block text-xs md:text-sm font-medium mb-1">មុខវិជ្ជា</label>
+            <select id="scoreSubject" required class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-sm">
+              <option value="">-- ជ្រើសរើស --</option>
+            </select>
+          </div>
+          <div class="col-span-1">
+            <label class="block text-xs md:text-sm font-medium mb-1">ប្រចាំខែ</label>
+            <input type="month" id="scoreMonth" required class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-sm">
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium mb-1">ពិន្ទុប្រឡង</label>
+            <input type="number" id="examScore" value="0" min="0" oninput="calcTotalScore()" class="score-input w-full border p-2 rounded-lg text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium mb-1">ពិន្ទុអវត្តមាន</label>
+            <input type="number" id="attendanceScore" value="0" min="0" oninput="calcTotalScore()" class="score-input w-full border p-2 rounded-lg text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium mb-1">ពិន្ទុវិន័យ</label>
+            <input type="number" id="disciplineScore" value="0" min="0" oninput="calcTotalScore()" class="score-input w-full border p-2 rounded-lg text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium mb-1">ពិន្ទុសកម្មភាព</label>
+            <input type="number" id="activityScore" value="0" min="0" oninput="calcTotalScore()" class="score-input w-full border p-2 rounded-lg text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium mb-1">ពិន្ទុកិច្ចការផ្ទះ</label>
+            <input type="number" id="homeworkScore" value="0" min="0" oninput="calcTotalScore()" class="score-input w-full border p-2 rounded-lg text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium mb-1">ពិន្ទុឆែកសៀវភៅ</label>
+            <input type="number" id="bookCheckScore" value="0" min="0" oninput="calcTotalScore()" class="score-input w-full border p-2 rounded-lg text-sm">
+          </div>
+
+          <div class="col-span-2 flex items-center justify-between bg-slate-50 p-2 rounded-lg border">
+            <span class="font-bold text-slate-700 text-xs md:text-sm">ពិន្ទុសរុប៖</span>
+            <span id="displayTotalScore" class="text-lg md:text-xl font-bold text-green-600">0</span>
+          </div>
+
+          <div class="col-span-2 md:col-span-4 text-right space-x-2 pt-2">
+            <button type="button" id="btnCancelScoreEdit" onclick="resetScoreForm()" class="hidden bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 transition text-sm">បោះបង់</button>
+            <button type="submit" id="btnSaveScore" class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition font-medium text-sm">💾 រក្សាទុកពិន្ទុ</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- របារស្វែងរក និង ច្រោះទិន្នន័យ -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="col-span-2 md:col-span-1">
+          <label class="block text-xs font-semibold text-slate-500 mb-1">🔍 ស្វែងរកឈ្មោះសិស្ស</label>
+          <input type="text" id="scoreSearchInput" oninput="filterScores()" placeholder="វាយឈ្មោះសិស្ស..." class="w-full border p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1">🏫 ច្រោះតាមថ្នាក់</label>
+          <select id="scoreFilterClass" onchange="filterScores()" class="w-full border p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
+            <option value="">-- គ្រប់ថ្នាក់ --</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1">📚 ច្រោះមុខវិជ្ជា</label>
+          <select id="scoreFilterSubject" onchange="filterScores()" class="w-full border p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
+            <option value="">-- គ្រប់មុខវិជ្ជា --</option>
+          </select>
+        </div>
+        <div class="col-span-2 md:col-span-1">
+          <label class="block text-xs font-semibold text-slate-500 mb-1">📅 ច្រោះតាមខែ</label>
+          <input type="month" id="scoreFilterMonth" onchange="filterScores()" class="w-full border p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
+        </div>
+      </div>
+
+      <!-- តារាងបង្ហាញពិន្ទុ -->
+      <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+          <h2 class="text-base md:text-lg font-bold text-slate-700">📜 បញ្ជីពិន្ទុសិស្សសរុប</h2>
+          <button onclick="loadScores()" class="text-xs md:text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-md border transition">🔄 ធ្វើបច្ចុប្បន្នភាព</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[750px] text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700">
+                <th class="p-2 border text-center">ល.រ</th>
+                <th class="p-2 border">ឈ្មោះសិស្ស</th>
+                <th class="p-2 border">មុខវិជ្ជា</th>
+                <th class="p-2 border">ប្រចាំខែ</th>
+                <th class="p-2 border text-center">ប្រឡង</th>
+                <th class="p-2 border text-center">អវត្តមាន</th>
+                <th class="p-2 border text-center">វិន័យ</th>
+                <th class="p-2 border text-center">សកម្មភាព</th>
+                <th class="p-2 border text-center">កិច្ចការផ្ទះ</th>
+                <th class="p-2 border text-center">ឆែកសៀវភៅ</th>
+                <th class="p-2 border text-center font-bold text-green-700 bg-green-50">ពិន្ទុសរុប</th>
+                <th class="p-2 border text-center">សកម្មភាព</th>
+              </tr>
+            </thead>
+            <tbody id="scoreTableBody" class="text-slate-600">
+              <tr>
+                <td colspan="12" class="p-4 text-center text-slate-400">កំពុងទាញយកទិន្នន័យ...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. ARTICLE TAB (សម្រង់អត្ថបទ) -->
+    <section id="articleTab" class="tab-content hidden space-y-4">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200 gap-4">
+        <h2 class="text-lg md:text-xl font-bold text-slate-800">📚 សម្រង់អត្ថបទ</h2>
+        
+        <!-- Filter Controls -->
+        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div class="flex-1 min-w-[130px]">
+            <label class="block text-xs font-semibold text-slate-500 mb-1">🏫 ថ្នាក់ (ពីថេបទី១)</label>
+            <select id="articleFilterClass" onchange="renderArticles()" class="w-full border p-2 rounded-lg text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">-- គ្រប់ថ្នាក់ --</option>
+            </select>
+          </div>
+          <div class="flex-1 min-w-[130px]">
+            <label class="block text-xs font-semibold text-slate-500 mb-1">📚 មុខវិជ្ជា (ពីថេបទី៣)</label>
+            <select id="articleFilterSubject" onchange="renderArticles()" class="w-full border p-2 rounded-lg text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">-- គ្រប់មុខវិជ្ជា --</option>
+            </select>
+          </div>
+          <div class="w-full sm:w-auto sm:self-end">
+            <button onclick="openArticleModal()" class="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+              + បន្ថែមអត្ថបទថ្មី
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Article -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <table class="w-full min-w-[700px] text-left border-collapse">
+          <thead class="bg-slate-800 text-white text-xs uppercase">
+            <tr>
+              <th class="p-3 border w-12 text-center">ល.រ</th>
+              <th class="p-3 border">ចំណងជើងអត្ថបទ</th>
+              <th class="p-3 border text-center w-28">ថ្នាក់រៀន</th>
+              <th class="p-3 border text-center w-32">មុខវិជ្ជា</th>
+              <th class="p-3 border text-center w-28">កាលបរិច្ឆេទ</th>
+              <th class="p-3 border text-center w-36">ប្រភព/អ្នកសរសេរ</th>
+              <th class="p-3 border text-center w-20">សកម្មភាព</th>
+            </tr>
+          </thead>
+          <tbody id="articleTableBody" class="text-slate-600 text-sm"></tbody>
+        </table>
+      </div>
+
+      <!-- Article Modal Form (លេចឡើងលើអេក្រង់ Mobile ស្អាត) -->
+      <div id="articleModal" class="hidden fixed inset-0 bg-black/50 p-4 flex items-center justify-center z-50 overflow-y-auto">
+        <div class="bg-white p-5 md:p-6 rounded-xl w-full max-w-md shadow-2xl space-y-4 my-auto">
+          <h3 class="text-base md:text-lg font-bold text-slate-800 border-b pb-2">📝 បន្ថែមអត្ថបទថ្មី</h3>
+          <form id="articleForm" onsubmit="event.preventDefault(); saveArticle();" class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">ចំណងជើងអត្ថបទ</label>
+              <input type="text" id="articleTitle" required class="w-full border rounded p-2 text-sm focus:outline-blue-500">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">ថ្នាក់រៀន</label>
+                <select id="articleClass" required class="w-full border rounded p-2 text-sm focus:outline-blue-500">
+                  <option value="">-- ជ្រើសរើស --</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">មុខវិជ្ជា</label>
+                <select id="articleSubject" required class="w-full border rounded p-2 text-sm focus:outline-blue-500">
+                  <option value="">-- ជ្រើសរើស --</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">កាលបរិច្ឆេទ</label>
+              <input type="date" id="articleDate" required class="w-full border rounded p-2 text-sm focus:outline-blue-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">អ្នកសរសេរ / ប្រភព</label>
+              <input type="text" id="articleSignature" class="w-full border rounded p-2 text-sm focus:outline-blue-500">
+            </div>
+            <div class="flex justify-end gap-2 pt-3 border-t">
+              <button type="button" onclick="document.getElementById('articleModal').classList.add('hidden')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs md:text-sm">បោះបង់</button>
+              <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs md:text-sm hover:bg-blue-700">រក្សាទុក</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. MEETING TAB (កំណត់ហេតុប្រជុំ) -->
+    <section id="meetingTab" class="tab-content hidden space-y-4">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200 gap-3">
+        <h2 class="text-lg md:text-xl font-bold text-slate-800">📝 កំណត់ហេតុប្រជុំ</h2>
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-between">
+          <label class="text-xs sm:text-sm font-semibold text-slate-600 whitespace-nowrap">ជ្រើសរើសខែ៖</label>
+          <input type="month" id="meetingFilterMonth" onchange="loadMeetings()" class="border rounded p-1.5 text-sm focus:outline-blue-500">
+        </div>
+      </div>
+
+      <!-- Meeting Form -->
+      <div class="bg-white p-4 rounded-xl shadow-sm space-y-3 border border-slate-200">
+        <input type="hidden" id="meetingId">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">ប្រជុំលើកទី</label>
+            <input type="text" id="meetingNumber" placeholder="ឧទាហរណ៍៖ លើកទី ០១" class="w-full border rounded p-2 text-sm focus:outline-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">របៀបវារៈ / ប្រធានបទ</label>
+            <input type="text" id="meetingAgenda" placeholder="ប្រធានបទប្រជុំ..." class="w-full border rounded p-2 text-sm focus:outline-blue-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">ខ្លឹមសារសង្ខេប / លទ្ធផលប្រជុំ</label>
+          <textarea id="meetingContent" rows="3" placeholder="ព័ត៌មានលម្អិត..." class="w-full border rounded p-2 text-sm focus:outline-blue-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-1">
+          <button id="btnCancelMeeting" type="button" onclick="resetMeetingForm()" class="hidden px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs md:text-sm hover:bg-slate-300">បោះបង់</button>
+          <button id="btnSaveMeeting" type="button" onclick="saveMeeting()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs md:text-sm hover:bg-blue-700">រក្សាទុកកំណត់ហេតុ</button>
+          <button id="btnUpdateMeeting" type="button" onclick="updateMeeting()" class="hidden px-4 py-2 bg-amber-500 text-white rounded-lg text-xs md:text-sm hover:bg-amber-600">កែប្រែទិន្នន័យ</button>
+        </div>
+      </div>
+
+      <!-- Meeting Table -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <table class="w-full min-w-[650px] text-left border-collapse">
+          <thead class="bg-slate-800 text-white text-xs uppercase">
+            <tr>
+              <th class="p-3 border w-12 text-center">ល.រ</th>
+              <th class="p-3 border w-28">លើកទី</th>
+              <th class="p-3 border w-52">របៀបវារៈ</th>
+              <th class="p-3 border">ខ្លឹមសារកំណត់ហេតុ</th>
+              <th class="p-3 border text-center w-24">សកម្មភាព</th>
+            </tr>
+          </thead>
+          <tbody id="meetingTableBody" class="text-slate-600 text-xs md:text-sm">
+            <tr>
+              <td colspan="5" class="p-4 text-center text-slate-400">មិនទាន់មានទិន្នន័យប្រជុំ</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    </main>
+      <script>
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+              .then(() => console.log('PWA Service Worker Registered!'))
+              .catch(err => console.log('SW registration failed:', err));
+          });
+        }
+
+        const API_URL = 'http://localhost:3000/api';
+        let rawStudentsList = []; 
+        let subjectsList = [];
+        let rawScoresList = [];
+        let articlesList = [];
+
+        // ==================== NAVIGATION TAB SWITCHER ====================
+        let students = JSON.parse(localStorage.getItem('students')) || [];
+        let subjects = JSON.parse(localStorage.getItem('subjects')) || ['អក្សរសាស្ត្រខ្មែរ', 'គណិតវិទ្យា', 'រូបវិទ្យា'];
+        let articles = JSON.parse(localStorage.getItem('articles')) || [];
+
+        function showTab(tabId) {
+          document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+
+          document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.remove('bg-blue-600', 'text-white');
+            btn.classList.add('text-slate-300', 'hover:bg-slate-800');
+          });
+
+          const targetTab = document.getElementById(tabId);
+          if (targetTab) targetTab.classList.remove('hidden');
+
+          const activeBtn = document.getElementById(`btn-${tabId}`);
+          if (activeBtn) {
+            activeBtn.classList.add('bg-blue-600', 'text-white');
+            activeBtn.classList.remove('text-slate-300', 'hover:bg-slate-800');
+          }
+
+          if (tabId === 'studentTab') if (typeof loadStudents === 'function') loadStudents();
+          if (tabId === 'attendanceTab') if (typeof initAttendanceTab === 'function') initAttendanceTab();
+          if (tabId === 'scoreTab') if (typeof initScoreTab === 'function') initScoreTab();
+          
+          if (tabId === 'articleTab') {
+            populateArticleDropdowns();
+            loadArticles();
+          }
+
+          if (tabId === 'meetingTab') {
+            const monthInput = document.getElementById('meetingFilterMonth');
+            if (monthInput && !monthInput.value) {
+              monthInput.value = new Date().toISOString().slice(0, 7);
+            }
+            if (typeof loadMeetings === 'function') loadMeetings();
+          }
+        }
+
+        // ==================== ARTICLE DROPDOWNS & MODAL ====================
+        async function populateArticleDropdowns() {
+          try {
+            let studentsData = rawStudentsList;
+            if (!studentsData || studentsData.length === 0) {
+              const resSt = await fetch(`${API_URL}/students`);
+              studentsData = await resSt.json();
+              rawStudentsList = studentsData;
+            }
+
+            let subjectsData = subjectsList;
+            if (!subjectsData || subjectsData.length === 0) {
+              const resSub = await fetch(`${API_URL}/subjects`);
+              subjectsData = await resSub.json();
+              subjectsList = subjectsData;
+            }
+
+            const classList = [...new Set(studentsData.map(s => s.className).filter(Boolean))].sort();
+            const cleanSubjectsList = [...new Set(subjectsData.map(s => typeof s === 'object' ? s.name : s).filter(Boolean))].sort();
+
+            updateSelectOptions('articleFilterClass', classList, '-- គ្រប់ថ្នាក់ --');
+            updateSelectOptions('articleClass', classList, '-- ជ្រើសរើសថ្នាក់ --');
+            updateSelectOptions('attFilterClass', classList, '-- ជ្រើសរើសថ្នាក់ --');
+
+            updateSelectOptions('articleFilterSubject', cleanSubjectsList, '-- គ្រប់មុខវិជ្ជា --');
+            updateSelectOptions('articleSubject', cleanSubjectsList, '-- ជ្រើសរើសមុខវិជ្ជា --');
+          } catch (err) {
+            console.error("Error loading dropdown options:", err);
+          }
+        }
+
+        function updateSelectOptions(elementId, items, defaultText) {
+          const select = document.getElementById(elementId);
+          if (!select) return;
+
+          const currentVal = select.value;
+          select.innerHTML = `<option value="">${defaultText}</option>`;
+
+          items.forEach(item => {
+            if (item) {
+              const opt = document.createElement('option');
+              opt.value = item;
+              opt.textContent = item;
+              select.appendChild(opt);
+            }
+          });
+
+          select.value = currentVal;
+        }
+
+        function openArticleModal() {
+          populateArticleDropdowns();
+          const modal = document.getElementById('articleModal');
+          if (modal) modal.classList.remove('hidden');
+        }
+
+        // ==================== ARTICLE MANAGEMENT (FIXED LAYOUT) ====================
+        async function loadArticles() {
+          const cls = document.getElementById('articleFilterClass')?.value || '';
+          const subj = document.getElementById('articleFilterSubject')?.value || '';
+          const tbody = document.getElementById('articleTableBody');
+
+          if (!tbody) return;
+
+          try {
+            const res = await fetch(`${API_URL}/articles`);
+            const articles = await res.json();
+
+            if (!Array.isArray(articles) || articles.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">ពុំមានទិន្នន័យអត្ថបទទេ</td></tr>`;
+              return;
+            }
+
+            const filtered = articles.filter(art => {
+              const matchClass = !cls || art.className === cls;
+              const matchSubj = !subj || art.subject === subj;
+              return matchClass && matchSubj;
+            });
+
+            if (filtered.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">ពុំមានទិន្នន័យអត្ថបទស្របតាមការច្រោះនេះទេ</td></tr>`;
+              return;
+            }
+
+            // Render គ្រប់ ៧ ជួរឈរជានិច្ច ការពារការរំកិល
+            tbody.innerHTML = filtered.map((item, idx) => {
+              const title = item.title || item.name || 'ឥតចំណងជើង';
+              const className = item.className || item.class || 'មិនមាន';
+              const subject = item.subject || 'មិនមាន';
+              const date = item.date || item.createdAt || '-';
+              const signature = item.signature || item.author || 'មិនមាន';
+              const id = item._id || item.id || '';
+
+              return `
+                <tr class="border-b hover:bg-slate-50 transition">
+                  <td class="p-3 text-center border font-bold">${idx + 1}</td>
+                  <td class="p-3 font-semibold text-slate-800 border">${title}</td>
+                  <td class="p-3 border text-center">
+                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">${className}</span>
+                  </td>
+                  <td class="p-3 border text-center">
+                    <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs font-bold">${subject}</span>
+                  </td>
+                  <td class="p-3 border text-center text-xs">${date}</td>
+                  <td class="p-3 text-blue-700 italic border text-center text-xs">${signature}</td>
+                  <td class="p-3 border text-center space-x-1 whitespace-nowrap">
+                    <button onclick="prepareEditArticle('${id}')" class="bg-amber-500 text-white px-2 py-1 rounded hover:bg-amber-600 text-xs font-bold transition">✏️ កែប្រែ</button>
+                    <button onclick="deleteArticle('${id}')" class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-xs font-bold transition">🗑️ លុប</button>
+                  </td>
+                </tr>
+              `;
+            }).join('');
+
+          } catch (error) {
+            console.error("Error loading articles:", error);
+            tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-red-500">មានបញ្ហាក្នុងការទាញយកទិន្នន័យអត្ថបទ</td></tr>`;
+          }
+        }
+
+        async function prepareEditArticle(id) {
+          // ត្រួតពិនិត្យក្រែង ID ទទេ ឬជា String "undefined"
+          if (!id || id === 'undefined' || id === 'null') {
+            alert("ទិន្នន័យនេះខ្វះ ID ត្រឹមត្រូវ (អាចជាទិន្នន័យចាស់) មិនអាចកែប្រែបានទេ! សូមលុបចោល ហើយបង្កើតថ្មី។");
+            return;
+          }
+
+          try {
+            const res = await fetch(`${API_URL}/articles/${id}`);
+            
+            // ត្រួតពិនិត្យ Response Header ក្រែងបានមកជា HTML
+            const contentType = res.headers.get("content-type");
+            if (!res.ok || !contentType || !contentType.includes("application/json")) {
+              throw new Error(`Server តបមកជា HTML ឬរកមិនឃើញ API route (Status: ${res.status})`);
+            }
+
+            const art = await res.json();
+
+            if (!art || (!art._id && !art.id)) {
+              alert("មិនអាចរកឃើញទិន្នន័យអត្ថបទនេះក្នុង Database ទេ!");
+              return;
+            }
+
+            // ១. បំពេញ ID ចូល hidden input
+            let idInput = document.getElementById('articleId');
+            if (!idInput) {
+              idInput = document.createElement('input');
+              idInput.type = 'hidden';
+              idInput.id = 'articleId';
+              document.getElementById('articleForm')?.appendChild(idInput);
+            }
+            idInput.value = art._id || art.id;
+
+            // ២. បំពេញទិន្នន័យចូល Form (បូករួមទាំង Fallback Keys)
+            if (document.getElementById('articleTitle')) {
+              document.getElementById('articleTitle').value = art.title || '';
+            }
+            
+            // ថ្នាក់រៀន
+            if (document.getElementById('articleClass')) {
+              document.getElementById('articleClass').value = art.className || art.studentClass || art.class || '';
+            }
+            
+            // មុខវិជ្ជា
+            if (document.getElementById('articleSubject')) {
+              document.getElementById('articleSubject').value = art.subject || '';
+            }
+            
+            // កាលបរិច្ឆេទ (កាត់យកត្រឹម YYYY-MM-DD សម្រាប់ input type="date")
+            if (document.getElementById('articleDate')) {
+              let formattedDate = art.date || '';
+              if (formattedDate.includes('T')) {
+                formattedDate = formattedDate.split('T')[0];
+              }
+              document.getElementById('articleDate').value = formattedDate;
+            }
+            
+            // អ្នកសរសេរ / ប្រភព
+            if (document.getElementById('articleSignature')) {
+              document.getElementById('articleSignature').value = art.signature || art.author || art.source || '';
+            }
+
+            // ៣. ប្តូរចំណងជើង Modal ឱ្យត្រូវតាមស្ថានភាពកែប្រែ (Optional)
+            const modalTitle = document.querySelector('#articleModal h3');
+            if (modalTitle) modalTitle.innerText = "✏️ កែប្រែអត្ថបទ";
+
+            openArticleModal();
+
+          } catch (err) {
+            alert("មានបញ្ហាក្នុងការទាញយកទិន្នន័យ៖ " + err.message);
+          }
+        }
+
+        async function saveArticle() {
+          const id = document.getElementById('articleId')?.value;
+          const title = document.getElementById('articleTitle')?.value?.trim();
+          const className = document.getElementById('articleClass')?.value;
+          const subject = document.getElementById('articleSubject')?.value;
+          const date = document.getElementById('articleDate')?.value;
+          const signature = document.getElementById('articleSignature')?.value?.trim();
+
+          if (!title || !className || !subject || !date) {
+            alert("សូមបំពេញព័ត៌មានចាំបាច់ឱ្យបានគ្រប់គ្រាន់!");
+            return;
+          }
+
+          // 💡 ផ្ញើ Key ទាំង២ទម្រង់ (ដើម្បីចៀសវាង Backend ចាប់ឈ្មោះ Field មិនត្រូវ)
+          const articleData = { 
+            title, 
+            className, 
+            studentClass: className, // បន្ថែមករណី Backend ប្រើឈ្មោះ studentClass
+            subject, 
+            date, 
+            signature,
+            author: signature // បន្ថែមករណី Backend ប្រើឈ្មោះ author
+          };
+
+          // 💡 ពិនិត្យក្រែងលោ id មានតម្លៃ "undefined" ឬ "null" ជា String
+          const isEdit = id && id !== 'undefined' && id !== 'null' && id.trim() !== '';
+          const url = isEdit ? `${API_URL}/articles/${id}` : `${API_URL}/articles`;
+          const method = isEdit ? 'PUT' : 'POST';
+
+          try {
+            const res = await fetch(url, {
+              method: method,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(articleData)
+            });
+
+            if (res.ok) {
+              alert(isEdit ? "កែប្រែអត្ថបទបានជោគជ័យ!" : "បន្ថែមអត្ថបទថ្មីបានជោគជ័យ!");
+              
+              if (typeof resetArticleForm === 'function') resetArticleForm();
+
+              const modal = document.getElementById('articleModal');
+              if (modal) modal.classList.add('hidden');
+
+              if (typeof loadArticles === 'function') await loadArticles();
+            } else {
+              const errData = await res.json().catch(() => ({}));
+              // 💡 បង្ហាញ Error លម្អិតពី Backend
+              console.error("Backend Error Details:", errData);
+              alert("បរាជ័យ៖ " + (errData.message || errData.error || `Server Error Code (${res.status})`));
+            }
+          } catch (error) {
+            console.error("Fetch Error:", error);
+            alert("មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server៖ " + error.message);
+          }
+        }
+
+        function resetArticleForm() {
+          const form = document.getElementById('articleForm');
+          if (form) form.reset();
+
+          // លុប ID ចាស់ចេញពី hidden input
+          const idInput = document.getElementById('articleId');
+          if (idInput) idInput.value = '';
+
+          // ប្តូរចំណងជើង Modal មកដើមវិញ
+          const modalTitle = document.querySelector('#articleModal h3');
+          if (modalTitle) modalTitle.innerText = "📝 បន្ថែមអត្ថបទថ្មី";
+        }
+
+        async function deleteArticle(id) {
+          if (!id || id === 'undefined') {
+            alert('មិនអាចលុបទិន្នន័យនេះបានទេ ដោយសារខ្វះ ID (ទិន្នន័យចាស់)!');
+            return;
+          }
+
+          if (confirm('តើអ្នកពិតជាចង់លុបអត្ថបទនេះមែនទេ?')) {
+            try {
+              const res = await fetch(`${API_URL}/articles/${id}`, { method: 'DELETE' });
+              if (res.ok) {
+                alert('លុបបានជោគជ័យ!');
+                loadArticles();
+              } else {
+                alert('មិនអាចលុបបានទេ!');
+              }
+            } catch (err) {
+              alert('មានបញ្ហាក្នុងការលុប៖ ' + err.message);
+            }
+          }
+        }
+
+        function renderArticles() {
+          loadArticles();
+        }
+
+        // ==================== 1. STUDENT MANAGEMENT ====================
+        async function loadStudents() {
+          const tbody = document.getElementById('studentTableBody');
+          try {
+            const res = await fetch(`${API_URL}/students`);
+            rawStudentsList = await res.json();
+            filterAndSortStudents();
+          } catch (error) {
+            if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-500">មានបញ្ហាក្នុងការទាញយកទិន្នន័យ</td></tr>`;
+          }
+        }
+
+        function filterAndSortStudents() {
+          const searchInput = document.getElementById('studentSearchInput');
+          const sortSelect = document.getElementById('studentSortSelect');
+          const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
+          const sortVal = sortSelect ? sortSelect.value : 'name-asc';
+
+          let list = [...rawStudentsList];
+
+          if (searchVal) {
+            list = list.filter(s => 
+              s.name.toLowerCase().includes(searchVal) || 
+              s.className.toLowerCase().includes(searchVal)
+            );
+          }
+
+          list.sort((a, b) => {
+            if (sortVal === 'name-asc') return a.name.localeCompare(b.name, 'km');
+            if (sortVal === 'name-desc') return b.name.localeCompare(a.name, 'km');
+            if (sortVal === 'class-asc') return a.className.localeCompare(b.className);
+            return 0;
+          });
+
+          renderStudentTable(list);
+        }
+
+        function renderStudentTable(students) {
+          const tbody = document.getElementById('studentTableBody');
+          if (!tbody) return;
+
+          if (students.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">មិនមានទិន្នន័យសិស្សឡើយ</td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = students.map((s, index) => `
+            <tr class="border-b hover:bg-slate-50 transition">
+              <td class="p-3 border text-center">${index + 1}</td>
+              <td class="p-3 border font-semibold text-slate-800">${s.name}</td>
+              <td class="p-3 border text-center">${s.gender}</td>
+              <td class="p-3 border">${s.dob}</td>
+              <td class="p-3 border">${s.className}</td>
+              <td class="p-3 border text-center space-x-1">
+                <button onclick="prepareEditStudent('${s._id}')" class="bg-amber-500 text-white px-2.5 py-1 rounded hover:bg-amber-600 text-xs transition">កែប្រែ</button>
+                <button onclick="deleteStudent('${s._id}')" class="bg-red-600 text-white px-2.5 py-1 rounded hover:bg-red-700 text-xs transition">លុប</button>
+              </td>
+            </tr>
+          `).join('');
+        }
+
+        const studentForm = document.getElementById('studentForm');
+        if (studentForm) {
+          studentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('studentId').value;
+            const data = {
+              name: document.getElementById('regStudentName').value.trim(),
+              gender: document.getElementById('regGender').value,
+              dob: document.getElementById('regDob').value,
+              className: document.getElementById('regClass').value.trim()
+            };
+
+            const url = id ? `${API_URL}/students/${id}` : `${API_URL}/students`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+              const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+              });
+              const result = await res.json();
+              if (res.ok) {
+                alert(result.message);
+                resetStudentForm();
+                loadStudents();
+              } else {
+                alert("Error: " + (result.error || result.message));
+              }
+            } catch (error) {
+              alert("មានបញ្ហាក្នុងការផ្ញើទិន្នន័យ! " + error.message);
+            }
+          });
+        }
+
+        function prepareEditStudent(id) {
+          const student = rawStudentsList.find(s => s._id === id);
+          if (!student) return;
+
+          document.getElementById('studentId').value = student._id;
+          document.getElementById('regStudentName').value = student.name;
+          document.getElementById('regGender').value = student.gender;
+          document.getElementById('regDob').value = student.dob;
+          document.getElementById('regClass').value = student.className;
+
+          document.getElementById('studentFormTitle').innerText = "✏️ កែប្រែព័ត៌មានសិស្ស";
+          document.getElementById('btnSaveStudent').innerText = "រក្សាទុកការកែប្រែ";
+          document.getElementById('btnCancelEdit')?.classList.remove('hidden');
+        }
+
+        function resetStudentForm() {
+          if (document.getElementById('studentId')) document.getElementById('studentId').value = '';
+          if (document.getElementById('studentForm')) document.getElementById('studentForm').reset();
+          if (document.getElementById('studentFormTitle')) document.getElementById('studentFormTitle').innerText = "👤 ចុះឈ្មោះសិស្សថ្មី";
+          if (document.getElementById('btnSaveStudent')) document.getElementById('btnSaveStudent').innerText = "រក្សាទុកទិន្នន័យសិស្ស";
+          if (document.getElementById('btnCancelEdit')) document.getElementById('btnCancelEdit').classList.add('hidden');
+        }
+
+        async function deleteStudent(id) {
+          if (!confirm("តើអ្នកប្រាកដជាចង់លុបទិន្នន័យសិស្សនេះមែនទេ?")) return;
+          try {
+            const res = await fetch(`${API_URL}/students/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (res.ok) {
+              alert(result.message);
+              loadStudents();
+            }
+          } catch (error) {
+            alert("មិនអាចលុបទិន្នន័យបានទេ! " + error.message);
+          }
+        }
+
+        // ==================== 2. ATTENDANCE MANAGEMENT ====================
+        async function initAttendanceTab() {
+          await loadStudents();
+          const classSelect = document.getElementById('attFilterClass');
+          if (classSelect) {
+            const classes = [...new Set(rawStudentsList.map(s => s.className))];
+            classSelect.innerHTML = '<option value="">-- ជ្រើសរើសថ្នាក់ --</option>' + 
+              classes.map(c => `<option value="${c}">${c}</option>`).join('');
+          }
+
+          const monthInput = document.getElementById('attFilterMonth');
+          if (monthInput && !monthInput.value) {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            monthInput.value = `${yyyy}-${mm}`;
+          }
+
+          loadAttendanceTable();
+        }
+
+        async function loadAttendanceTable() {
+          const className = document.getElementById('attFilterClass')?.value;
+          const month = document.getElementById('attFilterMonth')?.value;
+          const tbody = document.getElementById('attTableBody');
+
+          if (!tbody) return;
+
+          if (!className || !month) {
+            tbody.innerHTML = `<tr><td colspan="36" class="p-6 text-center text-slate-400">សូមជ្រើសរើសថ្នាក់ និងខែ ដើម្បីបង្ហាញតារាងអវត្តមាន</td></tr>`;
+            return;
+          }
+
+          const [year, monthNum] = month.split('-').map(Number);
+          const daysInMonth = new Date(year, monthNum, 0).getDate(); 
+
+          const headerRow = document.getElementById('attTableHeader');
+          if (headerRow) {
+            headerRow.innerHTML = `
+              <th class="p-2 border border-slate-700 w-10">ល.រ</th>
+              <th class="p-2 border border-slate-700 min-w-[140px] text-left">ឈ្មោះសិស្ស</th>
+              <th class="p-2 border border-slate-700 w-12">ភេទ</th>
+            ` + Array.from({length: daysInMonth}, (_, i) => `<th class="p-1 border border-slate-700 w-8">${i+1}</th>`).join('') +
+            `<th class="p-2 border border-slate-700 w-16 bg-blue-900 text-amber-300">ពិន្ទុសរុប</th>`;
+          }
+
+          try {
+            const res = await fetch(`${API_URL}/attendance?className=${encodeURIComponent(className)}&month=${month}`);
+            const data = await res.json();
+
+            if (data.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="${daysInMonth + 4}" class="p-6 text-center text-slate-400">មិនមានសិស្សក្នុងថ្នាក់នេះទេ</td></tr>`;
+              return;
+            }
+
+            tbody.innerHTML = data.map((st, idx) => {
+              let score = 10;
+              for (let d = 1; d <= daysInMonth; d++) {
+                const val = st.days[d] || '✔';
+                if (val === 'P') score -= 0.5;
+                else if (val === 'A') score -= 1.0;
+              }
+              if (score < 0) score = 0;
+
+              return `
+                <tr class="border-b hover:bg-slate-50 student-att-row" data-id="${st.studentId}" data-name="${st.studentName}">
+                  <td class="p-2 border text-center font-medium">${idx + 1}</td>
+                  <td class="p-2 border font-semibold text-left text-slate-800">${st.studentName}</td>
+                  <td class="p-2 border text-center">${st.gender}</td>
+                  ${Array.from({length: daysInMonth}, (_, d) => {
+                    const dayNum = d + 1;
+                    const val = st.days[dayNum] || '✔';
+                    return `
+                      <td class="p-0 border text-center">
+                        <select 
+                          onchange="updateSelectColor(this); calculateRowScore(this);"
+                          class="att-day-input w-full h-full text-center font-bold outline-none cursor-pointer py-1.5 text-xs bg-transparent" 
+                          data-day="${dayNum}">
+                          <option value="✔" ${val === '✔' ? 'selected' : ''}>✔</option>
+                          <option value="P" ${val === 'P' ? 'selected' : ''}>P</option>
+                          <option value="A" ${val === 'A' ? 'selected' : ''}>A</option>
+                        </select>
+                      </td>
+                    `;
+                  }).join('')}
+                  <td class="p-2 border text-center font-bold text-blue-700 bg-blue-50 row-total-score" data-score="${score}">
+                    ${score}
+                  </td>
+                </tr>
+              `;
+            }).join('');
+
+            document.querySelectorAll('.att-day-input').forEach(sel => updateSelectColor(sel));
+
+          } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="${daysInMonth + 4}" class="p-6 text-center text-red-500">មានបញ្ហាក្នុងការទាញយកទិន្នន័យ</td></tr>`;
+          }
+        }
+
+        function calculateRowScore(selectEl) {
+          const row = selectEl.closest('tr');
+          const selects = row.querySelectorAll('.att-day-input');
+          let score = 10;
+          
+          selects.forEach(s => {
+            const val = s.value;
+            if (val === 'P') score -= 0.5;
+            else if (val === 'A') score -= 1.0;
+          });
+
+          if (score < 0) score = 0;
+          
+          const scoreTd = row.querySelector('.row-total-score');
+          if (scoreTd) {
+            scoreTd.innerText = score;
+            scoreTd.setAttribute('data-score', score);
+          }
+        }
+
+        function updateSelectColor(selectEl) {
+          const val = selectEl.value;
+          const td = selectEl.parentElement;
+          
+          if (val === '✔') {
+            selectEl.style.color = '#16a34a';
+            if (td) td.style.backgroundColor = '#f0fdf4';
+          } else if (val === 'P') {
+            selectEl.style.color = '#d97706';
+            if (td) td.style.backgroundColor = '#fffbeb';
+          } else if (val === 'A') {
+            selectEl.style.color = '#dc2626';
+            if (td) td.style.backgroundColor = '#fef2f2';
+          }
+        }
+
+        async function saveAttendanceData() {
+          const className = document.getElementById('attFilterClass')?.value;
+          const month = document.getElementById('attFilterMonth')?.value;
+
+          if (!className || !month) {
+            alert("សូមជ្រើសរើសថ្នាក់ និងខែជាមុនសិន!");
+            return;
+          }
+
+          const rows = document.querySelectorAll('.student-att-row');
+          const attendanceData = [];
+
+          rows.forEach(row => {
+            const studentId = row.dataset.id;
+            const studentName = row.dataset.name;
+            const days = {};
+
+            row.querySelectorAll('.att-day-input').forEach(sel => {
+              days[sel.dataset.day] = sel.value;
+            });
+
+            attendanceData.push({ studentId, studentName, days });
+          });
+
+          try {
+            const res = await fetch(`${API_URL}/attendance/save`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ className, month, attendanceData })
+            });
+            const resData = await res.json();
+            alert(resData.message);
+          } catch (err) {
+            alert("បរាជ័យក្នុងការរក្សាទុក៖ " + err.message);
+          }
+        }
+
+       // មុខងារទាញពិន្ទុអវត្តមានមកបំពេញក្នុង Form ស្វ័យប្រវត្តិ (បច្ចុប្បន្នភាពចុងក្រោយ)
+        async function autoFillAttendanceScore() {
+          const scoreStudentSelect = document.getElementById('scoreStudentName');
+          const month = document.getElementById('scoreMonth').value;
+          const attScoreInput = document.getElementById('attendanceScore');
+
+          if (!scoreStudentSelect.value || !month) return;
+
+          // ១. ទាញយកឈ្មោះសិស្សពិតប្រាកដ (កាត់ផ្នែក (7A) ឬឈ្មោះថ្នាក់ចេញ)
+          const selectedOption = scoreStudentSelect.options[scoreStudentSelect.selectedIndex];
+          // ប្រសិនបើមាន data-name ប្រើ data-name ឬកាត់តាមសញ្ញា (
+          const studentName = selectedOption.getAttribute('data-name') || scoreStudentSelect.value.split('(')[0].trim();
+
+          // ២. រកមើលទិន្នន័យសិស្សដើម្បីយកឈ្មោះថ្នាក់ (className)
+          const student = rawStudentsList.find(s => s.name.trim() === studentName);
+          if (!student) return;
+
+          try {
+            const res = await fetch(`${API_URL}/attendance?className=${encodeURIComponent(student.className)}&month=${month}`);
+            const data = await res.json();
+            
+            // ៣. ស្វែងរកទិន្នន័យអវត្តមានរបស់សិស្សក្នុងខែនោះ
+            const stAtt = data.find(s => s.studentName.trim() === studentName);
+            
+            if (stAtt) {
+              const [year, monthNum] = month.split('-').map(Number);
+              const daysInMonth = new Date(year, monthNum, 0).getDate();
+              
+              // ៤. គណនាពិន្ទុដក៖ ពិន្ទុពេញ ១០, ច្បាប់(P) ដក ០.៥, អវត្តមាន(A) ដក ១
+              let score = 10;
+              for (let d = 1; d <= daysInMonth; d++) {
+                const val = stAtt.days[d] || '✔';
+                if (val === 'P') score -= 0.5;
+                else if (val === 'A') score -= 1.0;
+              }
+              if (score < 0) score = 0; // មិនឱ្យទាបជាង ០
+
+              // បញ្ចូលពិន្ទុទៅក្នុងប្រអប់
+              attScoreInput.value = score;
+            } else {
+              // ប្រសិនបមិនទាន់មានទិន្នន័យអវត្តមាន ឱ្យពិន្ទុពេញ ១០
+              attScoreInput.value = 10;
+            }
+
+            // ៥. រត់គណនាពិន្ទុសរុបក្នុង Form ភ្លាមៗ
+            calcTotalScore();
+
+          } catch (err) {
+            console.error("មិនអាចទាញពិន្ទុអវត្តមានបានឡើយ", err);
+          }
+        }
+
+        // ភ្ជាប់ Event ពេលជ្រើសរើស ឈ្មោះសិស្ស ឬ ខែ
+        document.getElementById('scoreStudentName').addEventListener('change', autoFillAttendanceScore);
+        document.getElementById('scoreMonth').addEventListener('change', autoFillAttendanceScore);
+
+        // ==================== 3. SCORE MANAGEMENT ====================
+        async function initScoreTab() {
+          await loadStudents();
+          await loadSubjects();
+          
+          const studentSelect = document.getElementById('scoreStudentName');
+          if (studentSelect) {
+            studentSelect.innerHTML = '<option value="">-- ជ្រើសរើសសិស្ស --</option>' + 
+              rawStudentsList.map(s => `<option value="${s.name}" data-class="${s.className}">${s.name} (${s.className})</option>`).join('');
+          }
+
+          const classFilter = document.getElementById('scoreFilterClass');
+          if (classFilter) {
+            const classes = [...new Set(rawStudentsList.map(s => s.className))];
+            classFilter.innerHTML = '<option value="">-- គ្រប់ថ្នាក់ --</option>' + 
+              classes.map(c => `<option value="${c}">${c}</option>`).join('');
+          }
+
+          const subjectFilter = document.getElementById('scoreFilterSubject');
+          if (subjectFilter) {
+            subjectFilter.innerHTML = '<option value="">-- គ្រប់មុខវិជ្ជា --</option>' + 
+              subjectsList.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+          }
+
+          loadScores();
+        }
+
+        async function loadSubjects() {
+          try {
+            const res = await fetch(`${API_URL}/subjects`);
+            subjectsList = await res.json();
+            const subjectSelect = document.getElementById('scoreSubject');
+            if (subjectSelect) {
+              subjectSelect.innerHTML = '<option value="">-- ជ្រើសរើសមុខវិជ្ជា --</option>' + 
+                subjectsList.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+            }
+          } catch (err) {
+            console.error("Error loading subjects:", err);
+          }
+        }
+
+        async function loadScores() {
+          const tbody = document.getElementById('scoreTableBody');
+          try {
+            const res = await fetch(`${API_URL}/scores`);
+            rawScoresList = await res.json();
+            filterScores();
+          } catch (error) {
+            if (tbody) tbody.innerHTML = `<tr><td colspan="12" class="p-4 text-center text-red-500">មានបញ្ហាក្នុងការទាញយកទិន្នន័យ</td></tr>`;
+          }
+        }
+
+        function filterScores() {
+          const searchName = document.getElementById('scoreSearchInput')?.value.toLowerCase().trim() || '';
+          const filterClass = document.getElementById('scoreFilterClass')?.value || '';
+          const filterSub = document.getElementById('scoreFilterSubject')?.value || '';
+          const filterMonth = document.getElementById('scoreFilterMonth')?.value || '';
+
+          let filtered = rawScoresList.filter(item => {
+            const studentInfo = rawStudentsList.find(s => s.name === item.studentName);
+            const studentClass = studentInfo ? studentInfo.className : '';
+
+            const matchName = item.studentName.toLowerCase().includes(searchName);
+            const matchClass = filterClass === '' || studentClass === filterClass;
+            const matchSub = filterSub === '' || item.subject === filterSub;
+            const matchMonth = filterMonth === '' || item.month === filterMonth;
+
+            return matchName && matchClass && matchSub && matchMonth;
+          });
+
+          renderScoreTable(filtered);
+        }
+
+        function renderScoreTable(scores) {
+          const tbody = document.getElementById('scoreTableBody');
+          if (!tbody) return;
+
+          if (scores.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="12" class="p-4 text-center text-slate-400">មិនមានទិន្នន័យពិន្ទុឡើយ</td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = scores.map((sc, index) => `
+            <tr class="border-b hover:bg-slate-50 transition">
+              <td class="p-2 border text-center">${index + 1}</td>
+              <td class="p-2 border font-semibold text-slate-800">${sc.studentName}</td>
+              <td class="p-2 border font-medium text-purple-700">${sc.subject || '-'}</td>
+              <td class="p-2 border">${sc.month}</td>
+              <td class="p-2 border text-center">${sc.examScore}</td>
+              <td class="p-2 border text-center">${sc.attendanceScore || 0}</td>
+              <td class="p-2 border text-center">${sc.disciplineScore}</td>
+              <td class="p-2 border text-center">${sc.activityScore || 0}</td>
+              <td class="p-2 border text-center">${sc.homeworkScore}</td>
+              <td class="p-2 border text-center">${sc.bookCheckScore || 0}</td>
+              <td class="p-2 border text-center font-bold text-green-700 bg-green-50">${sc.totalScore}</td>
+              <td class="p-2 border text-center space-x-1">
+                <button onclick="prepareEditScore('${sc._id}')" class="bg-amber-500 text-white px-2 py-0.5 rounded text-xs hover:bg-amber-600 transition">កែប្រែ</button>
+                <button onclick="deleteScore('${sc._id}')" class="bg-red-600 text-white px-2 py-0.5 rounded text-xs hover:bg-red-700 transition">លុប</button>
+              </td>
+            </tr>
+          `).join('');
+        }
+
+        function calcTotalScore() {
+          const exam = Number(document.getElementById('examScore')?.value) || 0;
+          const att = Number(document.getElementById('attendanceScore')?.value) || 0;
+          const disc = Number(document.getElementById('disciplineScore')?.value) || 0;
+          const act = Number(document.getElementById('activityScore')?.value) || 0;
+          const hw = Number(document.getElementById('homeworkScore')?.value) || 0;
+          const book = Number(document.getElementById('bookCheckScore')?.value) || 0;
+
+          const totalEl = document.getElementById('displayTotalScore');
+          if (totalEl) totalEl.innerText = exam + att + disc + act + hw + book;
+        }
+
+        const scoreForm = document.getElementById('scoreForm');
+        if (scoreForm) {
+          scoreForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('scoreId').value;
+            const data = {
+              studentName: document.getElementById('scoreStudentName').value,
+              subject: document.getElementById('scoreSubject').value,
+              month: document.getElementById('scoreMonth').value,
+              examScore: Number(document.getElementById('examScore').value) || 0,
+              attendanceScore: Number(document.getElementById('attendanceScore').value) || 0,
+              disciplineScore: Number(document.getElementById('disciplineScore').value) || 0,
+              activityScore: Number(document.getElementById('activityScore').value) || 0,
+              homeworkScore: Number(document.getElementById('homeworkScore').value) || 0,
+              bookCheckScore: Number(document.getElementById('bookCheckScore').value) || 0
+            };
+
+            const url = id ? `${API_URL}/scores/${id}` : `${API_URL}/scores`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+              const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+              });
+              const result = await res.json();
+              if (res.ok) {
+                alert(result.message || "រក្សាទុកពិន្ទុបានជោគជ័យ");
+                resetScoreForm();
+                loadScores();
+              } else {
+                alert("Error: " + (result.error || result.message));
+              }
+            } catch (error) {
+              alert("មានបញ្ហាក្នុងការផ្ញើទិន្នន័យ! " + error.message);
+            }
+          });
+        }
+
+        function prepareEditScore(id) {
+          const sc = rawScoresList.find(s => s._id === id);
+          if (!sc) return;
+
+          document.getElementById('scoreId').value = sc._id;
+          document.getElementById('scoreStudentName').value = sc.studentName;
+          document.getElementById('scoreSubject').value = sc.subject;
+          document.getElementById('scoreMonth').value = sc.month;
+          document.getElementById('examScore').value = sc.examScore;
+          document.getElementById('attendanceScore').value = sc.attendanceScore;
+          document.getElementById('disciplineScore').value = sc.disciplineScore;
+          document.getElementById('activityScore').value = sc.activityScore;
+          document.getElementById('homeworkScore').value = sc.homeworkScore;
+          document.getElementById('bookCheckScore').value = sc.bookCheckScore;
+
+          calcTotalScore();
+        }
+
+        function resetScoreForm() {
+          if (document.getElementById('scoreId')) document.getElementById('scoreId').value = '';
+          if (document.getElementById('scoreForm')) document.getElementById('scoreForm').reset();
+          calcTotalScore();
+        }
+
+        async function deleteScore(id) {
+          if (!confirm("តើអ្នកប្រាកដជាចង់លុបទិន្នន័យពិន្ទុនេះមែនទេ?")) return;
+          try {
+            const res = await fetch(`${API_URL}/scores/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (res.ok) {
+              alert(result.message || "លុបបានជោគជ័យ");
+              loadScores();
+            }
+          } catch (error) {
+            alert("មិនអាចលុបទិន្នន័យបានទេ! " + error.message);
+          }
+        }
+
+        // ==================== MEETING FUNCTIONS ====================
+
+          // 1. កំណត់តម្លៃខែបច្ចុប្បន្នជា Default ពេល Load ទំព័រដំបូង
+          document.addEventListener("DOMContentLoaded", () => {
+            const filterMonth = document.getElementById('meetingFilterMonth');
+            if (filterMonth && !filterMonth.value) {
+              const today = new Date();
+              const currentMonth = today.toISOString().slice(0, 7); // ទម្រង់ YYYY-MM
+              filterMonth.value = currentMonth;
+            }
+            // Load ទិន្នន័យប្រជុំ
+            loadMeetings();
+          });
+
+          // 2. ទាញយកទិន្នន័យប្រជុំមកបង្ហាញក្នុងតារាង
+          async function loadMeetings() {
+            const monthInput = document.getElementById('meetingFilterMonth');
+            const month = monthInput ? monthInput.value : '';
+            const tbody = document.getElementById('meetingTableBody');
+
+            if (!tbody) return;
+
+            try {
+              const url = month ? `${API_URL}/meetings?month=${month}` : `${API_URL}/meetings`;
+              const res = await fetch(url);
+              const meetings = await res.json();
+
+              if (!Array.isArray(meetings) || meetings.length === 0) {
+                tbody.innerHTML = `
+                  <tr>
+                    <td colspan="5" class="p-4 text-center text-slate-400">មិនទាន់មានទិន្នន័យប្រជុំសម្រាប់ខែនេះទេ</td>
+                  </tr>`;
+                return;
+              }
+
+              tbody.innerHTML = meetings.map((m, index) => `
+                <tr class="hover:bg-slate-50 border-b">
+                  <td class="p-3 border text-center font-semibold">${index + 1}</td>
+                  <td class="p-3 border font-medium text-slate-700">${m.number || '-'}</td>
+                  <td class="p-3 border font-semibold text-blue-600">${m.agenda || '-'}</td>
+                  <td class="p-3 border whitespace-pre-wrap">${m.content || '-'}</td>
+                  <td class="p-3 border text-center">
+                    <div class="flex items-center justify-center gap-1">
+                      <button onclick="prepareEditMeeting('${m._id}')" class="px-2 py-1 bg-amber-500 text-white rounded text-xs hover:bg-amber-600">✏️ កែ</button>
+                      <button onclick="deleteMeeting('${m._id}')" class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600">🗑️ លុប</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join('');
+
+            } catch (error) {
+              console.error("Error loading meetings:", error);
+              tbody.innerHTML = `
+                <tr>
+                  <td colspan="5" class="p-4 text-center text-red-500">មានបញ្ហាក្នុងការទាញយកទិន្នន័យ៖ ${error.message}</td>
+                </tr>`;
+            }
+          }
+
+          // 3. រក្សាទុកកិច្ចប្រជុំថ្មី (POST)
+          async function saveMeeting() {
+            const number = document.getElementById('meetingNumber')?.value?.trim();
+            const agenda = document.getElementById('meetingAgenda')?.value?.trim();
+            const content = document.getElementById('meetingContent')?.value?.trim();
+            const month = document.getElementById('meetingFilterMonth')?.value;
+
+            if (!number || !agenda) {
+              alert("សូមបំពេញ 'ប្រជុំលើកទី' និង 'របៀបវារៈ / ប្រធានបទ' ឱ្យបានគ្រប់គ្រាន់!");
+              return;
+            }
+
+            if (!month) {
+              alert("សូមជ្រើសរើសខែជាមុនសិន!");
+              return;
+            }
+
+            const meetingData = { number, agenda, content, month };
+
+            try {
+              const res = await fetch(`${API_URL}/meetings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(meetingData)
+              });
+
+              const result = await res.json();
+
+              if (res.ok) {
+                alert("រក្សាទុកកំណត់ហេតុជោគជ័យ!");
+                resetMeetingForm();
+                await loadMeetings();
+              } else {
+                alert("បរាជ័យ៖ " + (result.error || result.message || "មានបញ្ហាពី Server"));
+              }
+            } catch (error) {
+              alert("មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server៖ " + error.message);
+            }
+          }
+
+          // 4. រៀបចំ Form សម្រាប់កែប្រែ (Edit Preparation)
+          async function prepareEditMeeting(id) {
+            if (!id) return;
+
+            try {
+              // ទាញយកទិន្នន័យ Meeting តាម ID
+              const res = await fetch(`${API_URL}/meetings`);
+              const meetings = await res.json();
+              const meeting = meetings.find(m => m._id === id);
+
+              if (!meeting) {
+                alert("រកមិនឃើញទិន្នន័យកិច្ចប្រជុំនេះទេ!");
+                return;
+              }
+
+              // បំពេញទិន្នន័យចូល Form
+              document.getElementById('meetingId').value = meeting._id;
+              document.getElementById('meetingNumber').value = meeting.number || '';
+              document.getElementById('meetingAgenda').value = meeting.agenda || '';
+              document.getElementById('meetingContent').value = meeting.content || '';
+
+              // បង្ហាញ ប៊ូតុង "កែប្រែ" និង "បោះបង់" ហើយលាក់ ប៊ូតុង "រក្សាទុក"
+              document.getElementById('btnSaveMeeting')?.classList.add('hidden');
+              document.getElementById('btnUpdateMeeting')?.classList.remove('hidden');
+              document.getElementById('btnCancelMeeting')?.classList.remove('hidden');
+
+            } catch (error) {
+              alert("មិនអាចទាញយកទិន្នន័យសម្រាប់កែប្រែបានទេ៖ " + error.message);
+            }
+          }
+
+          // 5. កែប្រែទិន្នន័យកិច្ចប្រជុំ (PUT)
+          async function updateMeeting() {
+            const id = document.getElementById('meetingId')?.value;
+            const number = document.getElementById('meetingNumber')?.value?.trim();
+            const agenda = document.getElementById('meetingAgenda')?.value?.trim();
+            const content = document.getElementById('meetingContent')?.value?.trim();
+            const month = document.getElementById('meetingFilterMonth')?.value;
+
+            if (!id) {
+              alert("មិនមាន ID សម្រាប់កែប្រែទេ!");
+              return;
+            }
+
+            if (!number || !agenda) {
+              alert("សូមបំពេញ 'ប្រជុំលើកទី' និង 'របៀបវារៈ / ប្រធានបទ' ឱ្យបានគ្រប់គ្រាន់!");
+              return;
+            }
+
+            const meetingData = { number, agenda, content, month };
+
+            try {
+              const res = await fetch(`${API_URL}/meetings/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(meetingData)
+              });
+
+              const result = await res.json();
+
+              if (res.ok) {
+                alert("កែប្រែកំណត់ហេតុជោគជ័យ!");
+                resetMeetingForm();
+                await loadMeetings();
+              } else {
+                alert("បរាជ័យ៖ " + (result.error || result.message || "មានបញ្ហាពី Server"));
+              }
+            } catch (error) {
+              alert("មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server៖ " + error.message);
+            }
+          }
+
+          // 6. លុបកិច្ចប្រជុំ (DELETE)
+          async function deleteMeeting(id) {
+            if (!confirm("តើអ្នកពិតជាចង់លុបកំណត់ហេតុប្រជុំនេះមែនទេ?")) return;
+
+            try {
+              const res = await fetch(`${API_URL}/meetings/${id}`, {
+                method: 'DELETE'
+              });
+
+              const result = await res.json();
+
+              if (res.ok) {
+                alert("លុបបានជោគជ័យ!");
+                await loadMeetings();
+              } else {
+                alert("បរាជ័យក្នុងការលុប៖ " + (result.error || result.message));
+              }
+            } catch (error) {
+              alert("មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server៖ " + error.message);
+            }
+          }
+
+          // 7. Reset Form មកស្ថានភាពដើម
+          function resetMeetingForm() {
+            document.getElementById('meetingId').value = '';
+            document.getElementById('meetingNumber').value = '';
+            document.getElementById('meetingAgenda').value = '';
+            document.getElementById('meetingContent').value = '';
+
+            // បង្ហាញប៊ូតុង រក្សាទុក ឡើងវិញ
+            document.getElementById('btnSaveMeeting')?.classList.remove('hidden');
+            document.getElementById('btnUpdateMeeting')?.classList.add('hidden');
+            document.getElementById('btnCancelMeeting')?.classList.add('hidden');
+          }
+    </script>
+  </body>
+</html>
